@@ -30,6 +30,7 @@ INJECTED from C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\and
 INJECTED from C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\android\app\src\debug\AndroidManifest.xml:1:1-7:12
 MERGED from [:image_picker_android] C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-34:12
 MERGED from [:flutter_plugin_android_lifecycle] C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
+MERGED from [:path_provider_android] C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\User\.gradle\caches\transforms-3\a49cd171355a6a39687e69f028c8bcbc\transformed\fragment-1.7.1\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.activity:activity:1.9.1] C:\Users\User\.gradle\caches\transforms-3\7045872d69c972b21dadf70ef6209be6\transformed\jetified-activity-1.9.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.window:window:1.2.0] C:\Users\User\.gradle\caches\transforms-3\3e108fe9d597d03770ae82acaebb5b63\transformed\jetified-window-1.2.0\AndroidManifest.xml:17:1-31:12
@@ -100,6 +101,8 @@ MERGED from [:image_picker_android] C:\Users\User\Documents\PROJECTS\Quickie-Mob
 MERGED from [:image_picker_android] C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:6:5-44
 MERGED from [:flutter_plugin_android_lifecycle] C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
 MERGED from [:flutter_plugin_android_lifecycle] C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] C:\Users\User\Documents\PROJECTS\Quickie-Mobile\quickie_mobile\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
 MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\User\.gradle\caches\transforms-3\a49cd171355a6a39687e69f028c8bcbc\transformed\fragment-1.7.1\AndroidManifest.xml:5:5-44
 MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\User\.gradle\caches\transforms-3\a49cd171355a6a39687e69f028c8bcbc\transformed\fragment-1.7.1\AndroidManifest.xml:5:5-44
 MERGED from [androidx.activity:activity:1.9.1] C:\Users\User\.gradle\caches\transforms-3\7045872d69c972b21dadf70ef6209be6\transformed\jetified-activity-1.9.1\AndroidManifest.xml:20:5-44
