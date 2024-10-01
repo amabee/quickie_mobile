@@ -1,4 +1,4 @@
-#Sun Sep 22 17:23:39 PST 2024
+#Tue Oct 01 14:53:37 PST 2024
 base.0=C\:\\Users\\User\\Documents\\PROJECTS\\Quickie-Mobile\\quickie_mobile\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\User\\Documents\\PROJECTS\\Quickie-Mobile\\quickie_mobile\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\0\\classes.dex
 base.2=C\:\\Users\\User\\Documents\\PROJECTS\\Quickie-Mobile\\quickie_mobile\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex

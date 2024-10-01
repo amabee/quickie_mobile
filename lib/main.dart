@@ -4,12 +4,13 @@ import 'package:quickie_mobile/providers/post_provider.dart';
 import 'package:quickie_mobile/providers/activity_filter_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:quickie_mobile/screens/splash.dart';
-import 'package:quickie_mobile/screens/splash.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Hive.openBox('myBox');
+  
   runApp(const MyApp());
 }
 

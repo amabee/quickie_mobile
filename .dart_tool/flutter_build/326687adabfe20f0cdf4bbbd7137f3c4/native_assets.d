@@ -1,0 +1,1 @@
+ C:\\Users\\User\\Documents\\PROJECTS\\Quickie-Mobile\\quickie_mobile\\.dart_tool\\flutter_build\\326687adabfe20f0cdf4bbbd7137f3c4\\native_assets.yaml: 
