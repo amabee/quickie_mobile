@@ -2,8 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quickie_mobile/actions/actions.dart';
+import 'package:quickie_mobile/providers/comments_provider.dart';
 import 'package:quickie_mobile/providers/post_provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:quickie_mobile/utils/bottomsheets/comment_bottomsheet_util.dart';
+import 'package:quickie_mobile/utils/instagram_carousel/instagram_carousel.dart';
+import 'package:quickie_mobile/utils/timeago.dart';
 
 import '../data/threads_posts_data.dart';
 import '../utils/bottomsheets/bottomsheet_util.dart';
@@ -90,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                                             ),
                                           ),
                                           Text(
-                                            post.time,
+                                            timeAgo(post.time),
                                             style: const TextStyle(
                                                 color: Colors.grey),
                                           ),
@@ -111,52 +115,16 @@ class HomeScreen extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 10),
                                       if (post.endimages.isNotEmpty)
-                                        CarouselSlider(
-                                          options: CarouselOptions(
-                                            height: 200.0,
-                                            enlargeCenterPage: true,
-                                            autoPlay: false,
-                                            aspectRatio: 16 / 9,
-                                            autoPlayCurve: Curves.fastOutSlowIn,
-                                            enableInfiniteScroll: false,
-                                            autoPlayAnimationDuration:
-                                                Duration(milliseconds: 800),
-                                            viewportFraction: 0.8,
-                                          ),
-                                          items: post.endimages.map((image) {
-                                            return Builder(
-                                              builder: (BuildContext context) {
-                                                return Container(
-                                                  width: MediaQuery.of(context)
-                                                      .size
-                                                      .width,
-                                                  margin: EdgeInsets.symmetric(
-                                                      horizontal: 5.0),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                  ),
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    child: Image.network(
-                                                      image,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          }).toList(),
-                                        ),
+                                        InstagramStyleCarousel(
+                                            images: post.endimages),
                                       const SizedBox(height: 20),
                                       Row(
                                         children: [
                                           GestureDetector(
                                             onTap: () {
-                                              likePost(post.postID);
+                                              post.isLiked == 0
+                                                  ? likePost(post.postID)
+                                                  : unlikePost(post.postID);
                                             },
                                             child: Padding(
                                               padding: const EdgeInsets.only(
@@ -173,7 +141,29 @@ class HomeScreen extends StatelessWidget {
                                             ),
                                           ),
                                           GestureDetector(
-                                            onTap: () {},
+                                            onTap: () {
+                                              showModalBottomSheet(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                builder: (context) =>
+                                                    ChangeNotifierProvider(
+                                                  create: (_) =>
+                                                      CommentProvider(),
+                                                  child:
+                                                      DraggableScrollableSheet(
+                                                    initialChildSize: 0.9,
+                                                    minChildSize: 0.5,
+                                                    maxChildSize: 0.95,
+                                                    builder: (_, controller) =>
+                                                        DraggableBottomSheet(
+                                                      postId: post.postID,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
                                             child: Padding(
                                               padding: const EdgeInsets.only(
                                                   right: 15),

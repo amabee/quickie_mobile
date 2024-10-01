@@ -40,3 +40,39 @@ void likePost(int post_id) async {
     print(e);
   }
 }
+
+void unlikePost(int post_id) async {
+  URL url = URL();
+
+  var userBox = await Hive.openBox('myBox');
+  int userId = userBox.get('userId');
+
+  final Map<String, dynamic> jsonData = {"user_id": userId, "post_id": post_id};
+
+  final Map<String, dynamic> queryParams = {
+    "operation": "dislikePost",
+    "json": jsonEncode(jsonData)
+  };
+
+  try {
+    http.Response res = await http.post(
+      Uri.parse(url.postsApiURL),
+      body: queryParams,
+    );
+
+    if (res.statusCode != 200) {
+      print("Status Error: ${res.statusCode}");
+      return;
+    }
+
+    var response = jsonDecode(res.body);
+
+    if (response.containsKey('error')) {
+      print("Error: ${response['error']}");
+    } else {
+      print("Post liked successfully");
+    }
+  } catch (e) {
+    print(e);
+  }
+}
