@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickie_mobile/actions/auth.dart';
 import 'package:quickie_mobile/screens/signup.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -44,7 +45,8 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
-                  // Implement login logic here
+                  login(
+                      _emailController.text, _passwordController.text, context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
@@ -54,9 +56,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: () {
-                  // Navigate to forgot password screen
-                },
+                onPressed: () {},
                 child: const Text('Forgot password?'),
               ),
             ],

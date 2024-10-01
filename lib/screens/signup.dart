@@ -1,10 +1,15 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickie_mobile/actions/auth.dart';
 import 'package:quickie_mobile/data/user_data.dart';
+import 'package:quickie_mobile/screens/login.dart';
 
 class SignupScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _firstnameController = TextEditingController();
+  final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -28,15 +33,34 @@ class SignupScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Instagram',
-                style: TextStyle(
-                  fontSize: 50,
-                  fontFamily: 'Billabong',
-                ),
-                textAlign: TextAlign.center,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    "assets/logo.png",
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                  ),
+                ],
               ),
               const SizedBox(height: 48),
+              TextField(
+                controller: _firstnameController,
+                decoration: const InputDecoration(
+                  hintText: 'Firstname',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _lastnameController,
+                decoration: const InputDecoration(
+                  hintText: 'Lastname',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -44,14 +68,6 @@ class SignupScreen extends StatelessWidget {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _fullNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Full Name',
-                  border: OutlineInputBorder(),
-                ),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -73,17 +89,13 @@ class SignupScreen extends StatelessWidget {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
-                  // Implement signup logic here
-                  final newUser = User(
-                    _fullNameController.text.split(' ').first,
-                    _fullNameController.text.split(' ').last,
-                    _usernameController.text,
-                    '',
-                    '',
-                    user_id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    email: _emailController.text,
-                  );
-                  // You would typically send this data to your backend here
+                  signup(
+                      _firstnameController.text,
+                      _lastnameController.text,
+                      _usernameController.text,
+                      _emailController.text,
+                      _passwordController.text,
+                      context);
                 },
                 child: const Text('Sign Up'),
                 style: ElevatedButton.styleFrom(
@@ -104,9 +116,17 @@ class SignupScreen extends StatelessWidget {
               const Text("Already have an account? "),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
                 },
-                child: const Text('Log in.'),
+                child: Text(
+                  'Log in.',
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.blue[300]
+                        : Colors.blue,
+                  ),
+                ),
               ),
             ],
           ),
