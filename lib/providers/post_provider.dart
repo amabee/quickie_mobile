@@ -6,10 +6,8 @@ import 'dart:convert';
 
 class PostProvider extends ChangeNotifier {
   List<Post> _postList = [];
-  List<int> _likedList = [];
 
   List<Post> get allPostList => _postList;
-  List<int> get likedList => _likedList;
 
   Future<void> fetchPosts() async {
     int userId = await Hive.box('myBox').get('userId', defaultValue: 0);
@@ -17,7 +15,6 @@ class PostProvider extends ChangeNotifier {
 
     try {
       _postList = await postService.fetchPosts(userId);
-      print('Fetched posts: $_postList');
       notifyListeners();
     } catch (error) {
       print("Current UserID: $userId");
@@ -31,12 +28,13 @@ class PostProvider extends ChangeNotifier {
       return;
     }
 
-    if (_likedList.contains(index)) {
+    if (_postList[index].isLiked == 1) {
       _postList[index].like--;
-      _likedList.remove(index);
+      _postList[index].isLiked = 0;
+      
     } else {
       _postList[index].like++;
-      _likedList.add(index);
+      _postList[index].isLiked = 1;
     }
 
     notifyListeners();

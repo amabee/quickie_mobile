@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickie_mobile/actions/actions.dart';
 import 'package:quickie_mobile/providers/post_provider.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 import '../data/threads_posts_data.dart';
 import '../utils/bottomsheets/bottomsheet_util.dart';
@@ -12,9 +14,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fetching posts data when HomeScreen is built
     final postProvider = Provider.of<PostProvider>(context);
-    postProvider.fetchPosts(); // Ensure posts are fetched when the widget is built
+    postProvider.fetchPosts();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -46,12 +47,10 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              // Consumer to rebuild when the post list changes
               Consumer<PostProvider>(
                 builder: (context, provider, child) {
-                  // Check if the post list is empty or not fetched yet
                   if (provider.allPostList.isEmpty) {
-                    return Center(child: CircularProgressIndicator()); // Show a loading indicator
+                    return Center(child: CircularProgressIndicator());
                   }
 
                   return ListView.builder(
@@ -66,72 +65,122 @@ class HomeScreen extends StatelessWidget {
                             padding: const EdgeInsets.all(10),
                             decoration: const BoxDecoration(
                               border: Border(
-                                bottom: BorderSide(color: Colors.grey, width: 0.2),
+                                bottom:
+                                    BorderSide(color: Colors.grey, width: 0.2),
                               ),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 CircleAvatar(
-                                  backgroundImage: AssetImage(post.image),
+                                  backgroundImage: NetworkImage(post.image),
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
-                                          Expanded(child: TitleText(text: post.name)),
+                                          Expanded(
+                                            child: TitleText(
+                                              text:
+                                                  "${post.firstname} ${post.lastname}",
+                                            ),
+                                          ),
                                           Text(
                                             post.time,
-                                            style: const TextStyle(color: Colors.grey),
+                                            style: const TextStyle(
+                                                color: Colors.grey),
                                           ),
                                           const SizedBox(width: 10),
                                           GestureDetector(
                                             onTap: () {
                                               showmoresheet(context);
                                             },
-                                            child: const Icon(Icons.more_horiz, color: Colors.grey),
+                                            child: const Icon(Icons.more_horiz,
+                                                color: Colors.grey),
                                           ),
                                         ],
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 10, top: 5),
+                                        padding: const EdgeInsets.only(
+                                            bottom: 10, top: 5),
                                         child: NormalText(text: post.content),
                                       ),
                                       const SizedBox(height: 10),
-                                      post.contentimg == null
-                                          ? Container()
-                                          : ClipRRect(
-                                              borderRadius: BorderRadius.circular(10),
-                                              child: Image.asset(post.contentimg!),
-                                            ),
+                                      if (post.endimages.isNotEmpty)
+                                        CarouselSlider(
+                                          options: CarouselOptions(
+                                            height: 200.0,
+                                            enlargeCenterPage: true,
+                                            autoPlay: false,
+                                            aspectRatio: 16 / 9,
+                                            autoPlayCurve: Curves.fastOutSlowIn,
+                                            enableInfiniteScroll: false,
+                                            autoPlayAnimationDuration:
+                                                Duration(milliseconds: 800),
+                                            viewportFraction: 0.8,
+                                          ),
+                                          items: post.endimages.map((image) {
+                                            return Builder(
+                                              builder: (BuildContext context) {
+                                                return Container(
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  margin: EdgeInsets.symmetric(
+                                                      horizontal: 5.0),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    child: Image.network(
+                                                      image,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          }).toList(),
+                                        ),
                                       const SizedBox(height: 20),
-                                      // Like, comment, repost, and share icons
                                       Row(
                                         children: [
                                           GestureDetector(
                                             onTap: () {
-                                              provider.likePost(index); // Call likePost with index
+                                              likePost(post.postID);
                                             },
                                             child: Padding(
-                                              padding: const EdgeInsets.only(right: 15),
+                                              padding: const EdgeInsets.only(
+                                                  right: 15),
                                               child: Icon(
-                                                provider.likedList.contains(index)
+                                                post.isLiked == 1
                                                     ? CupertinoIcons.heart_fill
                                                     : CupertinoIcons.heart,
-                                                color: provider.likedList.contains(index) ? Colors.red : Theme.of(context).primaryColor,
+                                                color: post.isLiked == 1
+                                                    ? Colors.red
+                                                    : Theme.of(context)
+                                                        .primaryColor,
                                               ),
                                             ),
                                           ),
                                           GestureDetector(
                                             onTap: () {},
                                             child: Padding(
-                                              padding: const EdgeInsets.only(right: 15),
+                                              padding: const EdgeInsets.only(
+                                                  right: 15),
                                               child: Icon(
                                                 CupertinoIcons.chat_bubble,
-                                                color: Theme.of(context).primaryColor,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
                                               ),
                                             ),
                                           ),
@@ -140,10 +189,12 @@ class HomeScreen extends StatelessWidget {
                                               showRepostsheet(context);
                                             },
                                             child: Padding(
-                                              padding: const EdgeInsets.only(right: 15),
+                                              padding: const EdgeInsets.only(
+                                                  right: 15),
                                               child: Icon(
                                                 CupertinoIcons.repeat,
-                                                color: Theme.of(context).primaryColor,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
                                               ),
                                             ),
                                           ),
@@ -152,10 +203,12 @@ class HomeScreen extends StatelessWidget {
                                               showsharesheet(context);
                                             },
                                             child: Padding(
-                                              padding: const EdgeInsets.only(right: 15),
+                                              padding: const EdgeInsets.only(
+                                                  right: 15),
                                               child: Icon(
                                                 CupertinoIcons.paperplane,
-                                                color: Theme.of(context).primaryColor,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
                                               ),
                                             ),
                                           ),
@@ -165,13 +218,15 @@ class HomeScreen extends StatelessWidget {
                                       Row(
                                         children: [
                                           Text(
-                                            "${post.reply} replies ",
-                                            style: const TextStyle(color: Colors.grey),
+                                            "${post.reply ?? '0'} replies ",
+                                            style: const TextStyle(
+                                                color: Colors.grey),
                                           ),
                                           const SizedBox(width: 10),
                                           Text(
                                             "${post.like} likes ",
-                                            style: const TextStyle(color: Colors.grey),
+                                            style: const TextStyle(
+                                                color: Colors.grey),
                                           ),
                                         ],
                                       ),
@@ -184,25 +239,23 @@ class HomeScreen extends StatelessWidget {
                           ),
                           Positioned.fill(
                             child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 55),
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 55),
                               alignment: Alignment.centerLeft,
                               child: const VerticalDivider(thickness: 2),
                             ),
                           ),
-                          Positioned(
+                          const Positioned(
                             bottom: 5,
                             left: 5,
                             child: Stack(
                               children: [
-                                const SizedBox(height: 35, width: 35),
-                                // Updated: Use fallback for images
+                                SizedBox(height: 35, width: 35),
                                 Positioned(
                                   right: 0,
                                   child: CircleAvatar(
                                     radius: 9,
-                                    backgroundImage: AssetImage(
-                                      post.endimages.isNotEmpty ? post.endimages[0] : 'assets/default_image.png', // Fallback image
-                                    ),
+                                    backgroundImage: NetworkImage(""),
                                   ),
                                 ),
                                 Positioned(
@@ -210,9 +263,6 @@ class HomeScreen extends StatelessWidget {
                                   top: 20,
                                   child: CircleAvatar(
                                     radius: 7,
-                                    backgroundImage: AssetImage(
-                                      post.endimages.length > 1 ? post.endimages[1] : 'assets/default_image.png', // Fallback image
-                                    ),
                                   ),
                                 ),
                                 Positioned(
@@ -220,9 +270,6 @@ class HomeScreen extends StatelessWidget {
                                   bottom: 0,
                                   child: CircleAvatar(
                                     radius: 5,
-                                    backgroundImage: AssetImage(
-                                      post.endimages.length > 2 ? post.endimages[2] : 'assets/default_image.png', // Fallback image
-                                    ),
                                   ),
                                 ),
                               ],
