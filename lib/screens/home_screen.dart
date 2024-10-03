@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height: 120,
+                    height: 110,
                     child: Image.asset("assets/logo.png"),
                   ),
                   ShaderMask(
@@ -157,7 +157,7 @@ class HomeScreen extends StatelessWidget {
                                                     minChildSize: 0.5,
                                                     maxChildSize: 0.95,
                                                     builder: (_, controller) =>
-                                                        DraggableBottomSheet(
+                                                        CommentBottomSheet(
                                                       postId: post.postID,
                                                     ),
                                                   ),

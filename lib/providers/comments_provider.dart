@@ -21,14 +21,33 @@ class CommentProvider extends ChangeNotifier {
     }
   }
 
-  void likeComment(int index) {
-    if (index < 0 || index >= _commentList.length) {
-      print("Invalid index: $index");
+  // Like/unlike a comment
+  void likeComment(int commentIndex) {
+    if (commentIndex < 0 || commentIndex >= _commentList.length) {
+      print("Invalid index: $commentIndex");
       return;
     }
 
-    _commentList[index].likedByUser =
-        _commentList[index].likedByUser == 1 ? 0 : 1;
+    _commentList[commentIndex].likedByUser =
+        _commentList[commentIndex].likedByUser == 1 ? 0 : 1;
+    notifyListeners();
+  }
+
+  // Like/unlike a reply
+  void likeReply(int commentIndex, int replyIndex) {
+    if (commentIndex < 0 || commentIndex >= _commentList.length) {
+      print("Invalid comment index: $commentIndex");
+      return;
+    }
+
+    if (replyIndex < 0 ||
+        replyIndex >= _commentList[commentIndex].replies.length) {
+      print("Invalid reply index: $replyIndex");
+      return;
+    }
+
+    _commentList[commentIndex].replies[replyIndex].likedByUser =
+        _commentList[commentIndex].replies[replyIndex].likedByUser == 1 ? 0 : 1;
     notifyListeners();
   }
 }

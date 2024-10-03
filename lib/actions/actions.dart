@@ -76,3 +76,81 @@ void unlikePost(int post_id) async {
     print(e);
   }
 }
+
+void followUser(int following_id) async {
+  URL url = URL();
+
+  var userBox = await Hive.openBox('myBox');
+  int userId = userBox.get('userId');
+
+  final Map<String, dynamic> jsonData = {
+    "follower_id": userId,
+    "following_id": following_id
+  };
+
+  final Map<String, dynamic> queryParams = {
+    "operation": "followUser",
+    "json": jsonEncode(jsonData)
+  };
+
+  try {
+    http.Response res = await http.post(
+      Uri.parse(url.usersApiURL),
+      body: queryParams,
+    );
+
+    if (res.statusCode != 200) {
+      print("Status Error: ${res.statusCode}");
+      return;
+    }
+
+    var response = jsonDecode(res.body);
+
+    if (response.containsKey('error')) {
+      print("Error: ${response['error']}");
+    } else {
+      print("You just followed this person");
+    }
+  } catch (e) {
+    print(e);
+  }
+}
+
+void unfollowUser(int following_id) async {
+  URL url = URL();
+
+  var userBox = await Hive.openBox('myBox');
+  int userId = userBox.get('userId');
+
+  final Map<String, dynamic> jsonData = {
+    "follower_id": userId,
+    "following_id": following_id
+  };
+
+  final Map<String, dynamic> queryParams = {
+    "operation": "unfollowUser",
+    "json": jsonEncode(jsonData)
+  };
+
+  try {
+    http.Response res = await http.post(
+      Uri.parse(url.usersApiURL),
+      body: queryParams,
+    );
+
+    if (res.statusCode != 200) {
+      print("Status Error: ${res.statusCode}");
+      return;
+    }
+
+    var response = jsonDecode(res.body);
+
+    if (response.containsKey('error')) {
+      print("Error: ${response['error']}");
+    } else {
+      print("You just unfollowed this person");
+    }
+  } catch (e) {
+    print(e);
+  }
+}
