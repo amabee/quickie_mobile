@@ -8,6 +8,7 @@ URL url = URL();
 
 class Post {
   final int postID;
+  final int postUserID;
   final String firstname;
   final String lastname;
   final String username;
@@ -22,6 +23,7 @@ class Post {
 
   Post(
       {required this.postID,
+      required this.postUserID,
       required this.firstname,
       required this.lastname,
       required this.username,
@@ -45,6 +47,7 @@ class Post {
 
     return Post(
       postID: json['post_id'],
+      postUserID: json['user_id'],
       firstname: json['first_name'],
       lastname: json['last_name'],
       username: json['username'],

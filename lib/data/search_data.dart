@@ -1,31 +1,102 @@
-class SearchItem{
-  final String name;
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:quickie_mobile/utils/url.dart';
+
+class SearchItem {
+  final String firstname;
+  final String lastname;
+  final String username;
   final String followers;
   final String image;
+  final int userId;
+  int isFollowing;
+
   SearchItem({
-    required this.name,
+    required this.firstname,
+    required this.lastname,
+    required this.username,
     required this.image,
-    required this.followers
-});
+    required this.followers,
+    required this.userId,
+    this.isFollowing = 0,
+  });
 }
 
-List<SearchItem>searchlist=[
-  SearchItem(name: "dev_73arner", image: "assets/profiles/myprofile.png", followers: "10k"),
-  SearchItem(name: "flutter.deviser", image: "assets/profiles/profile2.png", followers: "100k"),
-  SearchItem(name: "bugs_fixes", image: "assets/profiles/profile3.png", followers: "12k"),
-  SearchItem(name: "flutter_coding_", image: "assets/profiles/profile4.png", followers: "70k"),
-  SearchItem(name: "ashissh.dev", image: "assets/profiles/profile5.png", followers: "15k"),
-  SearchItem(name: "abhishvek", image: "assets/profiles/profile6.png", followers: "50k"),
-  SearchItem(name: "sergei_kodjebash", image: "assets/profiles/profile7.png", followers: "30k"),
-  SearchItem(name: "flutter_.girl", image: "assets/profiles/profile8.png", followers: "12k"),
-  SearchItem(name: "abdulgenrehman10", image: "assets/profiles/profile9.png", followers: "32k"),
-  SearchItem(name: "coding__bug", image: "assets/profiles/profile10.png", followers: "10k"),
-  SearchItem(name: "strength_code", image: "assets/profiles/profile11.png", followers: "10k"),
-  SearchItem(name: "flutter_works_", image: "assets/profiles/profile12.png", followers: "10k"),
-  SearchItem(name: "flutter.boy_", image: "assets/profiles/profile13.png", followers: "30k"),
-  SearchItem(name: "codewithflexz", image: "assets/profiles/profile14.png", followers: "70k"),
-  SearchItem(name: "mr.mir_", image: "assets/profiles/profile15.png", followers: "10k"),
-  SearchItem(name: "_msg.09", image: "assets/profiles/profile16.png", followers: "10k"),
-  SearchItem(name: "syed.saif.12139", image: "assets/profiles/profile17.png", followers: "10k"),
+class UserService {
+  final URL url = URL();
 
-];
+  Future<List<SearchItem>> fetchRecommendedUsers(int userID) async {
+    final Map<String, dynamic> jsonData = {"user_id": userID};
+    final Map<String, dynamic> queryParams = {
+      "operation": "suggestUsersToFollow",
+      "json": jsonEncode(jsonData),
+    };
+
+    final response = await http.get(
+      Uri.parse(url.usersApiURL).replace(queryParameters: queryParams),
+    );
+
+    print("RESPONSE: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      if (jsonResponse['success'] != null && jsonResponse['success'] is List) {
+        final List<dynamic> userList = jsonResponse['success'];
+        return userList.map((userJson) {
+          return SearchItem(
+              firstname: userJson['first_name'] ?? "",
+              lastname: userJson['last_name'] ?? "",
+              username: userJson['username'],
+              image: "${url.imageUrl}/${userJson['profile_image']}",
+              followers: userJson['follower_count']?.toString() ?? 'N/A',
+              userId: userJson['user_id'],
+              isFollowing: userJson['is_following'] ?? 0);
+        }).toList();
+      } else {
+        throw Exception('No users found or invalid response format');
+      }
+    } else {
+      throw Exception(
+          'Failed to load recommended users: ${response.statusCode}');
+    }
+  }
+
+  Future<List<SearchItem>> fetchSearchedUsers(
+      String searchedPerson, int current_ID) async {
+    final Map<String, dynamic> jsonData = {
+      "search_query": searchedPerson,
+      "current_user_id": current_ID
+    };
+    final Map<String, dynamic> queryParams = {
+      "operation": "searchUser",
+      "json": jsonEncode(jsonData),
+    };
+
+    final response = await http.get(
+      Uri.parse(url.usersApiURL).replace(queryParameters: queryParams),
+    );
+
+    print("RESPONSE: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      if (jsonResponse['success'] != null && jsonResponse['success'] is List) {
+        final List<dynamic> userList = jsonResponse['success'];
+        return userList.map((userJson) {
+          return SearchItem(
+              firstname: userJson['first_name'] ?? "",
+              lastname: userJson['last_name'] ?? "",
+              username: userJson['username'],
+              image: "${url.imageUrl}/${userJson['profile_image']}",
+              followers: userJson['follower_count']?.toString() ?? 'N/A',
+              userId: userJson['user_id'],
+              isFollowing: userJson['is_following']);
+        }).toList();
+      } else {
+        throw Exception('No users found or invalid response format');
+      }
+    } else {
+      throw Exception('Failed to load searched users: ${response.statusCode}');
+    }
+  }
+}
