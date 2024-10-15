@@ -123,7 +123,8 @@ class HomeScreen extends StatelessWidget {
                                           GestureDetector(
                                             onTap: () {
                                               post.isLiked == 0
-                                                  ? likePost(post.postID)
+                                                  ? likePost(post.postID,
+                                                      post.postUserID)
                                                   : unlikePost(post.postID);
                                             },
                                             child: Padding(
@@ -159,6 +160,8 @@ class HomeScreen extends StatelessWidget {
                                                     builder: (_, controller) =>
                                                         CommentBottomSheet(
                                                       postId: post.postID,
+                                                      postUserID:
+                                                          post.postUserID,
                                                     ),
                                                   ),
                                                 ),
@@ -174,34 +177,34 @@ class HomeScreen extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              showRepostsheet(context);
-                                            },
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 15),
-                                              child: Icon(
-                                                CupertinoIcons.repeat,
-                                                color: Theme.of(context)
-                                                    .primaryColor,
-                                              ),
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              showsharesheet(context);
-                                            },
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 15),
-                                              child: Icon(
-                                                CupertinoIcons.paperplane,
-                                                color: Theme.of(context)
-                                                    .primaryColor,
-                                              ),
-                                            ),
-                                          ),
+                                          // GestureDetector(
+                                          //   onTap: () {
+                                          //     showRepostsheet(context);
+                                          //   },
+                                          //   child: Padding(
+                                          //     padding: const EdgeInsets.only(
+                                          //         right: 15),
+                                          //     child: Icon(
+                                          //       CupertinoIcons.repeat,
+                                          //       color: Theme.of(context)
+                                          //           .primaryColor,
+                                          //     ),
+                                          //   ),
+                                          // ),
+                                          // GestureDetector(
+                                          //   onTap: () {
+                                          //     showsharesheet(context);
+                                          //   },
+                                          //   child: Padding(
+                                          //     padding: const EdgeInsets.only(
+                                          //         right: 15),
+                                          //     child: Icon(
+                                          //       CupertinoIcons.paperplane,
+                                          //       color: Theme.of(context)
+                                          //           .primaryColor,
+                                          //     ),
+                                          //   ),
+                                          // ),
                                         ],
                                       ),
                                       const SizedBox(height: 20),
@@ -235,36 +238,36 @@ class HomeScreen extends StatelessWidget {
                               child: const VerticalDivider(thickness: 2),
                             ),
                           ),
-                          const Positioned(
-                            bottom: 5,
-                            left: 5,
-                            child: Stack(
-                              children: [
-                                SizedBox(height: 35, width: 35),
-                                Positioned(
-                                  right: 0,
-                                  child: CircleAvatar(
-                                    radius: 9,
-                                    backgroundImage: NetworkImage(""),
-                                  ),
-                                ),
-                                Positioned(
-                                  left: 0,
-                                  top: 20,
-                                  child: CircleAvatar(
-                                    radius: 7,
-                                  ),
-                                ),
-                                Positioned(
-                                  right: 0,
-                                  bottom: 0,
-                                  child: CircleAvatar(
-                                    radius: 5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          // const Positioned(
+                          //   bottom: 5,
+                          //   left: 5,
+                          //   child: Stack(
+                          //     children: [
+                          //       SizedBox(height: 35, width: 35),
+                          //       Positioned(
+                          //         right: 0,
+                          //         child: CircleAvatar(
+                          //           radius: 9,
+                          //           backgroundImage: NetworkImage(""),
+                          //         ),
+                          //       ),
+                          //       Positioned(
+                          //         left: 0,
+                          //         top: 20,
+                          //         child: CircleAvatar(
+                          //           radius: 7,
+                          //         ),
+                          //       ),
+                          //       Positioned(
+                          //         right: 0,
+                          //         bottom: 0,
+                          //         child: CircleAvatar(
+                          //           radius: 5,
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       );
                     },

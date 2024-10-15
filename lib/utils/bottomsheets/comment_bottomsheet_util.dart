@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickie_mobile/actions/actions.dart';
 import 'package:quickie_mobile/data/comment_data.dart';
 import 'package:quickie_mobile/providers/comments_provider.dart';
 import 'package:quickie_mobile/utils/timeago.dart';
 
 class CommentBottomSheet extends StatefulWidget {
   final int postId;
-
+  final int postUserID;
   const CommentBottomSheet({
     Key? key,
     required this.postId,
+    required this.postUserID,
   }) : super(key: key);
 
   @override
@@ -18,6 +20,8 @@ class CommentBottomSheet extends StatefulWidget {
 
 class _CommentBottomSheetState extends State<CommentBottomSheet> {
   TextEditingController commentController = TextEditingController();
+  bool isSendingComment = false;
+  CommentInterface? replyingTo;
 
   @override
   void initState() {
@@ -26,12 +30,13 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
         .fetchComments(widget.postId);
   }
 
-  Widget _buildCommentTree(dynamic comment, int depth) {
+  Widget _buildCommentTree(CommentInterface comment, int depth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FacebookStyleCommentCard(
           name: '${comment.firstName} ${comment.lastName}',
+          comment_id: comment.id,
           comment: comment.content,
           commenterImage: comment.profileImage,
           likeCount: 0,
@@ -39,15 +44,71 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
           depth: depth,
           replies: comment.replies,
           isLikedByCurrentUser: comment.likedByUser,
+          isMainComment: comment is Comment,
+          parentCommentId: comment is Reply ? (comment as Reply).id : null,
+          onReply: () => _initiateReply(comment),
         ),
       ],
     );
   }
 
+  void _initiateReply(CommentInterface comment) {
+    setState(() {
+      replyingTo = comment;
+    });
+    FocusScope.of(context).requestFocus(FocusNode());
+    Future.delayed(Duration(milliseconds: 100), () {
+      FocusScope.of(context).requestFocus(FocusNode());
+    });
+
+     print(comment.firstName);
+  }
+
+  void _cancelReply() {
+    setState(() {
+      replyingTo = null;
+    });
+  }
+
+  Future<void> _sendComment() async {
+    if (commentController.text.isNotEmpty) {
+      setState(() {
+        isSendingComment = true;
+      });
+
+      try {
+        final commentProvider =
+            Provider.of<CommentProvider>(context, listen: false);
+        if (replyingTo != null) {
+          await commentProvider.addReply(widget.postId, replyingTo!.id,
+              commentController.text, replyingTo!.userId);
+        } else if (replyingTo != null) {
+        } else {
+          await commentProvider.addComment(
+            widget.postId,
+            commentController.text,
+            widget.postUserID,
+          );
+        }
+        commentController.clear();
+        _cancelReply();
+      } catch (e) {
+        print('Error sending comment: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send comment. Please try again.')),
+        );
+      } finally {
+        setState(() {
+          isSendingComment = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -56,14 +117,14 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
         children: <Widget>[
           Container(
             height: 60,
-            child: Center(
+            child: const Center(
               child: Text(
                 "Comments",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
               ),
             ),
           ),
-          Divider(height: 1),
+          const Divider(height: 1),
           Expanded(
             child: Consumer<CommentProvider>(
               builder: (context, commentProvider, child) {
@@ -76,7 +137,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   );
                 } else {
                   return ListView(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     children: commentProvider.allCommentList
                         .map<Widget>((comment) => _buildCommentTree(comment, 0))
                         .toList(),
@@ -85,57 +146,91 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
               },
             ),
           ),
-          Divider(height: 1),
+          const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundImage:
-                      NetworkImage(""), // Replace with user's avatar
-                  radius: 16,
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                    child: TextField(
-                  controller: commentController,
-                  decoration: InputDecoration(
-                    hintText: 'Write a comment...',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                    border: OutlineInputBorder(
-                      // Add border
-                      borderRadius: BorderRadius.circular(
-                          12.0), // Optional: rounded corners
-                      borderSide: BorderSide(
-                        color: Colors.grey, // Border color
-                        width: 1.0, // Border width
+                if (replyingTo != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[100],
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      // Normal state border
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: BorderSide(
-                        color:
-                            Colors.grey, // Color when textfield is not focused
-                        width: 1.0,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      // Focused state border
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: BorderSide(
-                        color: Colors.blue, // Color when textfield is focused
-                        width: 2.0,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Replying to ${replyingTo!.firstName}",
+                            style: TextStyle(
+                              color: Colors.blue[800],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: _cancelReply,
+                            child: Icon(Icons.close,
+                                size: 16, color: Colors.blue[800]),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                )),
-                IconButton(
-                  icon: Icon(Icons.send, color: Colors.blue),
-                  onPressed: () {
-                    // Add your send comment functionality here
-                  },
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: commentController,
+                        decoration: InputDecoration(
+                          hintText: replyingTo != null
+                              ? 'Write a reply...'
+                              : 'Write a comment...',
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 16.0),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(
+                              color: Colors.grey,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(
+                              color: Colors.grey,
+                              width: 1.0,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(
+                              color: Colors.blue,
+                              width: 2.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.send, color: Colors.blue),
+                      onPressed: isSendingComment ? null : _sendComment,
+                    ),
+                  ],
                 ),
+                if (isSendingComment)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Sending comment...',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -146,18 +241,23 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
 }
 
 class FacebookStyleCommentCard extends StatefulWidget {
+  final int comment_id;
   final String name;
   final String comment;
   final String commenterImage;
   final int likeCount;
   final String timeAgo;
   final int depth;
-  final List<dynamic> replies;
+  final List<CommentInterface> replies;
   final int isLikedByCurrentUser;
+  final bool isMainComment;
+  final int? parentCommentId;
+  final Function()? onReply;
 
   const FacebookStyleCommentCard({
     Key? key,
     required this.name,
+    required this.comment_id,
     required this.comment,
     required this.commenterImage,
     required this.likeCount,
@@ -165,6 +265,9 @@ class FacebookStyleCommentCard extends StatefulWidget {
     this.depth = 0,
     this.replies = const [],
     required this.isLikedByCurrentUser,
+    required this.isMainComment,
+    this.parentCommentId,
+    this.onReply,
   }) : super(key: key);
 
   @override
@@ -175,17 +278,14 @@ class FacebookStyleCommentCard extends StatefulWidget {
 class _FacebookStyleCommentCardState extends State<FacebookStyleCommentCard> {
   bool _showReplies = false;
 
-  Widget _buildReply(dynamic reply) {
-    return FacebookStyleCommentCard(
-      name: '${reply.firstName} ${reply.lastName}',
-      comment: reply.content,
-      commenterImage: reply.profileImage,
-      likeCount: reply.likedByUser,
-      timeAgo: '2h',
-      depth: widget.depth + 1,
-      replies: reply.replies,
-      isLikedByCurrentUser: 0,
-    );
+  void _handleLike() {
+    if (widget.isMainComment) {
+      Provider.of<CommentProvider>(context, listen: false)
+          .toggleCommentLike(widget.comment_id);
+    } else {
+      Provider.of<CommentProvider>(context, listen: false)
+          .toggleReplyLike(widget.parentCommentId!, widget.comment_id);
+    }
   }
 
   @override
@@ -194,7 +294,7 @@ class _FacebookStyleCommentCardState extends State<FacebookStyleCommentCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(bottom: 8.0),
+          padding: const EdgeInsets.only(bottom: 8.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -216,29 +316,31 @@ class _FacebookStyleCommentCardState extends State<FacebookStyleCommentCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(height: 10),
                           Text(
                             widget.name,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 4),
+                          Text(widget.comment),
+                          SizedBox(height: 4),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(
-                                child: Text(widget.comment),
+                              Text(
+                                widget.timeAgo,
+                                style: TextStyle(
+                                    color: Colors.grey[600], fontSize: 12),
                               ),
-                              SizedBox(width: 8),
                               Row(
                                 children: [
                                   IconButton(
-                                    onPressed: () {},
+                                    onPressed: _handleLike,
                                     icon: widget.isLikedByCurrentUser == 1
-                                        ? Icon(
+                                        ? const Icon(
                                             Icons.favorite,
                                             color: Colors.red,
                                           )
-                                        : Icon(Icons.favorite_outline),
+                                        : const Icon(Icons.favorite_outline),
                                     iconSize: 15,
                                     padding: EdgeInsets.zero,
                                     constraints: BoxConstraints(),
@@ -260,53 +362,65 @@ class _FacebookStyleCommentCardState extends State<FacebookStyleCommentCard> {
                     SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
-                          widget.timeAgo,
-                          style:
-                              TextStyle(color: Colors.grey[600], fontSize: 12),
-                        ),
-                        SizedBox(width: 16),
-                        Text(
-                          'Reply',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                        GestureDetector(
+                          onTap: widget.onReply,
+                          child: Text(
+                            'Reply ${widget.comment_id}',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
+                        if (widget.replies.isNotEmpty) ...[
+                          SizedBox(width: 16),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _showReplies = !_showReplies;
+                              });
+                            },
+                            child: Text(
+                              _showReplies
+                                  ? 'Hide Replies'
+                                  : 'Show ${widget.replies.length} ${widget.replies.length == 1 ? 'Reply' : 'Replies'}',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
-                    if (widget.replies.isNotEmpty)
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _showReplies = !_showReplies;
-                          });
-                        },
-                        child: Text(
-                          _showReplies
-                              ? 'Hide Replies'
-                              : 'Show ${widget.replies.length} ${widget.replies.length == 1 ? 'Reply' : 'Replies'}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
             ],
           ),
         ),
-        if (_showReplies)
+        if (_showReplies && widget.replies.isNotEmpty)
           Padding(
             padding: EdgeInsets.only(left: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: widget.replies
-                  .map<Widget>((reply) => _buildReply(reply))
+                  .map((reply) => FacebookStyleCommentCard(
+                        name: '${reply.firstName} ${reply.lastName}',
+                        comment_id: reply.id,
+                        comment: reply.content,
+                        commenterImage: reply.profileImage,
+                        likeCount: reply.likedByUser,
+                        timeAgo: timeAgo(reply.timestamp),
+                        depth: widget.depth + 1,
+                        replies: reply.replies,
+                        isLikedByCurrentUser: reply.likedByUser,
+                        isMainComment: false,
+                        parentCommentId: widget.comment_id,
+                        onReply: () => {widget.onReply?.call()},
+                      ))
                   .toList(),
             ),
           ),

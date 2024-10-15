@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
 String timeAgo(String timestamp) {
-  DateTime postTime = DateFormat("yyyy-MM-dd HH:mm:ss").parse(timestamp);
+  DateTime postTime = DateTime.parse(timestamp);
   DateTime currentTime = DateTime.now();
   Duration difference = currentTime.difference(postTime);
 

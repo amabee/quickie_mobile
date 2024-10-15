@@ -2,16 +2,22 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:quickie_mobile/actions/session_checker.dart';
+import 'package:quickie_mobile/providers/comments_provider.dart';
 import 'package:quickie_mobile/utils/url.dart';
 
-void likePost(int post_id) async {
+void likePost(int post_id, int target_id) async {
   URL url = URL();
 
   var userBox = await Hive.openBox('myBox');
   int userId = userBox.get('userId');
 
-  final Map<String, dynamic> jsonData = {"user_id": userId, "post_id": post_id};
+  final Map<String, dynamic> jsonData = {
+    "user_id": userId,
+    "post_id": post_id,
+    "target_id": target_id
+  };
 
   final Map<String, dynamic> queryParams = {
     "operation": "likePost",
@@ -154,3 +160,81 @@ void unfollowUser(int following_id) async {
     print(e);
   }
 }
+
+void sendComment(int post_id, String content, int target_id) async {
+  URL url = URL();
+  var userBox = await Hive.openBox('myBox');
+  int userId = userBox.get('userId');
+
+  final Map<String, dynamic> jsonData = {
+    "user_id": userId,
+    "post_id": post_id,
+    "content": content,
+    "target_id": target_id
+  };
+
+  final Map<String, dynamic> queryParams = {
+    "operation": "sendComment",
+    "json": jsonEncode(jsonData)
+  };
+
+  try {
+    http.Response res = await http.post(
+      Uri.parse(url.postsApiURL),
+      body: queryParams,
+    );
+
+    if (res.statusCode != 200) {
+      print("Status Error: ${res.statusCode}");
+      return;
+    }
+
+    var response = jsonDecode(res.body);
+
+    if (response.containsKey('error')) {
+      print("Error: ${response['error']}");
+    } else {
+      print("Post Commented successfully");
+    }
+  } catch (e) {
+    print(e);
+  }
+}
+
+// void likeComment(int comment_id) async {
+//   URL url = URL();
+//   var userBox = await Hive.openBox('myBox');
+//   int userId = userBox.get('userId');
+
+//   final Map<String, dynamic> jsonData = {
+//     "user_id": userId,
+//     "comment_id": comment_id
+//   };
+
+//   final Map<String, dynamic> queryParams = {
+//     "operation": "likeComment",
+//     "json": jsonEncode(jsonData)
+//   };
+
+//   try {
+//     http.Response res = await http.post(
+//       Uri.parse(url.postsApiURL),
+//       body: queryParams,
+//     );
+
+//     if (res.statusCode != 200) {
+//       print("Status Error: ${res.statusCode}");
+//       return;
+//     }
+
+//     var response = jsonDecode(res.body);
+
+//     if (response.containsKey('error')) {
+//       print("Error: ${response['error']}");
+//     } else {
+//       print("Post Commented successfully");
+//     }
+//   } catch (e) {
+//     print(e);
+//   }
+// }
